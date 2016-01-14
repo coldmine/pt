@@ -1,2 +1,2 @@
-# whatspoint
-(hopefully) simple web presentation software
+# pt
+web presentation software
