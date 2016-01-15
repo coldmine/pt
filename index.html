@@ -8,15 +8,65 @@
     border-width:2px;
     border-color:gray;
 }
+.obj {
+    cursor: move;
+}
 </style>
 </head>
+
 <body>
-
 <svg class="presentboard" height="200" width="200">
-  <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" />
-  <circle cx="150" cy="150" r="40" stroke="black" stroke-width="3" fill="red" />
+  <circle class="obj" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)" draggable="true"/>
+  <circle class="obj" cx="150" cy="150" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)" draggable="true"/>
 </svg>
-
 </body>
+
+<script type="text/javascript">
+var sel = 0;
+var x = 0;
+var y = 0;
+var mat = 0;
+
+function selectObj(ev) {
+    if ( ev.target.className.baseVal !== "obj" ) {
+        return;
+    }
+    console.log("select: " + ev);
+    console.log(ev.target);
+    sel = ev.target;
+    x = ev.clientX;
+    y = ev.clientY;
+    mat = sel.getAttributeNS(null, "transform").slice(7,-1).split(' ');
+    for (var i = 0; i < mat.length; i++) {
+        mat[i] = parseFloat(mat[i]);
+    }
+
+    document.addEventListener("mousemove", dragObj);
+}
+
+function deselectObj(ev) {
+    document.removeEventListener("mousemove", dragObj);
+
+    sel = 0;
+    x = 0;
+    y = 0;
+    mat = 0;
+}
+
+function dragObj(ev) {
+    var dx = ev.clientX - x;
+    var dy = ev.clientY - y;
+    mat[4] += dx;
+    mat[5] += dy;
+    newMat = "matrix(" + mat.join(' ') + ")";
+    sel.setAttributeNS(null, "transform", newMat);
+    x = ev.clientX;
+    y = ev.clientY;
+}
+
+document.addEventListener("mousedown", selectObj);
+document.addEventListener("mouseup", deselectObj);
+
+</script>
 </html>
 
