@@ -10,14 +10,17 @@
 }
 .obj {
     cursor: move;
+    draggable: true;
 }
 </style>
 </head>
 
 <body>
-<svg class="presentboard" height="200" width="200">
-  <circle class="obj" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)" draggable="true"/>
-  <circle class="obj" cx="150" cy="150" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)" draggable="true"/>
+<svg class="presentboard" height="800" width="600">
+    <text class="obj" x="100" y="400" transform="matrix(1 0 0 1 0 0)" style="font-size:30px">Hello, from the outside.</text>
+    <path class="obj" d="M 150 500 L 150 700 L 300 600 Z" transform="matrix(1 0 0 1 0 0)"/>
+    <circle class="obj" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)"/>
+    <circle class="obj" cx="150" cy="150" r="40" stroke="black" stroke-width="3" fill="red" transform="matrix(1 0 0 1 0 0)"/>
 </svg>
 </body>
 
