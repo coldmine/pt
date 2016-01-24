@@ -17,7 +17,7 @@
 
 <body>
 <svg class="presentboard" height="800" width="600">
-    <g transform="matrix(0.8 0.6 -0.6 0.8 350 0)">
+    <g class="obj" transform="matrix(0.8 0.6 -0.6 0.8 350 0)">
         <!-- TODO(yb): Group transform makes the children's move wierd. Make it appropriate. -->
         <text class="obj" x="100" y="400" transform="matrix(1 0 0 1 0 0)" style="font-size:30px">Hello, from the outside.</text>
         <path class="obj" d="M 150 500 L 150 700 L 300 600 Z" transform="matrix(1 0 0 1 0 0)"/>
@@ -37,9 +37,22 @@ function selectObj(ev) {
     if ( ev.target.className.baseVal !== "obj" ) {
         return;
     }
-    console.log("select: " + ev);
-    console.log(ev.target);
+
     sel = ev.target;
+    // if selected obj have parent groups,
+    // then most outside group will selected.
+    el = ev.target;
+    while (true) {
+        el = el.parentNode;
+        if (!el) {
+            break;
+        }
+
+        if (el.tagName === "g") {
+            sel = el;
+        }
+    }
+
     x = ev.clientX;
     y = ev.clientY;
     mat = sel.getAttributeNS(null, "transform").slice(7,-1).split(' ');
