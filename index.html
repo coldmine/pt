@@ -33,32 +33,33 @@ var x = 0;
 var y = 0;
 var mat = 0;
 
+// during ctrl key is pressed, selectLeaf will on.
+var selectLeaf = false;
+
 function selectObj(ev) {
     if ( ev.target.className.baseVal !== "obj" ) {
         return;
     }
 
     sel = ev.target;
-    // if selected obj have parent groups,
-    // then most outside group will selected.
-    el = ev.target;
-    while (true) {
-        el = el.parentNode;
-        if (!el) {
-            break;
-        }
 
-        if (el.tagName === "g") {
-            sel = el;
+    if ( !selectLeaf ) {
+        // most outside group will selected.
+        el = ev.target;
+        while (true) {
+            el = el.parentNode;
+            if (!el) {
+                break;
+            }
+
+            if (el.tagName === "g") {
+                sel = el;
+            }
         }
     }
-
     x = ev.clientX;
     y = ev.clientY;
-    mat = sel.getAttributeNS(null, "transform").slice(7,-1).split(' ');
-    for (var i = 0; i < mat.length; i++) {
-        mat[i] = parseFloat(mat[i]);
-    }
+    mat = matrixFromString(sel.getAttributeNS(null, "transform"));
 
     document.addEventListener("mousemove", dragObj);
 }
@@ -77,14 +78,81 @@ function dragObj(ev) {
     var dy = ev.clientY - y;
     mat[4] += dx;
     mat[5] += dy;
-    newMat = "matrix(" + mat.join(' ') + ")";
-    sel.setAttributeNS(null, "transform", newMat);
+    sel.setAttributeNS(null, "transform", matrixToString(mat));
     x = ev.clientX;
     y = ev.clientY;
 }
 
+function onKeyDown(ev) {
+    if ( ev.key === "Control" ) {
+        selectLeaf = true;
+    }
+}
+
+function onKeyUp(ev) {
+    if ( ev.key === "Control" ) {
+        selectLeaf = false;
+    }
+}
+
+// matrixFromString converts 2x3 matrix to string "matrix(a b c d e f)".
+function matrixToString(mat) {
+    return"matrix(" + mat.join(' ') + ")";
+}
+
+// matrixFromString converts string "matrix(a b c d e f)" to 2x3 matrix.
+function matrixFromString(matStr) {
+    mat = matStr.slice(7,-1).split(' ');
+    for (var i = 0; i < mat.length; i++) {
+        mat[i] = parseFloat(mat[i]);
+    }
+    return mat;
+}
+
+// matrixMultiply return multplied value of two matrix.
+//
+// a[0] a[2] a[4] * b[0] b[2] b[4]
+// a[1] a[3] a[5]   b[1] b[3] b[5]
+//    0    0    1      0    0    1
+//
+function matrixMultiply(a, b) {
+    c = Array(null, null, null, null, null, null);
+    c[0] = a[0] * b[0] + a[2] * b[1];
+    c[1] = a[1] * b[0] + a[3] * b[1];
+    c[2] = a[0] * b[2] + a[2] * b[3];
+    c[3] = a[1] * b[2] + a[3] * b[3];
+    c[4] = a[0] * b[4] + a[2] * b[5] + a[4];
+    c[5] = a[1] * b[5] + a[3] * b[5] + a[5];
+    return c;
+}
+
+// calcWorldTransform calculate world transform of the object.
+function calcWorldTransform(obj) {
+    // gather all parents transform.
+    var trs = Array();
+    while (true) {
+        trs.push(matrixFromString(obj.getAttributeNS(null, "transform")));
+        obj = obj.parentNode;
+        if ( obj.getAttributeNS(null, "class") === "presentboard" ) {
+            break;
+        }
+        if (!obj) {
+            console.log("should not reach here!");
+            break;
+        }
+    }
+    // multiply it all.
+    var worldTr = Array(1, 0, 0, 1, 0, 0);
+    trs.forEach(function(tr) {
+        worldTr = matrixMultiply(worldTr, tr);
+    });
+    return worldTr;
+}
+
 document.addEventListener("mousedown", selectObj);
 document.addEventListener("mouseup", deselectObj);
+document.addEventListener("keydown", onKeyDown);
+document.addEventListener("keyup", onKeyUp);
 
 </script>
 </html>
